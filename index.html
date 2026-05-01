@@ -1,0 +1,1183 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<!-- Mobil görünüm için hayati etiket -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<!-- Uygulama (PWA) Etiketleri -->
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ödev Sis.">
+<link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23e8b86d'/%3E%3Ctext x='256' y='360' font-size='300' font-family='serif' font-weight='bold' text-anchor='middle' fill='%231a1d27'%3EÖ%3C/text%3E%3C/svg%3E">
+
+<title>Ödev Değerlendirme Sistemi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #e8b86d;
+    --accent2: #7eb8d4;
+    --red: #e07070;
+    --green: #6dbf8a;
+    --text: #dde3f0;
+    --muted: #7a82a0;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    padding: 0 0 80px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+  }
+  .logo span { color: var(--muted); font-style: italic; font-size: 0.8rem; margin-left: 6px; display: inline-block;}
+
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  button {
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: pointer; border: none; border-radius: 6px;
+    font-size: 0.82rem; font-weight: 500; padding: 8px 14px;
+    transition: all 0.18s;
+  }
+
+  .btn-primary { background: var(--accent); color: #1a1200; }
+  .btn-primary:hover { background: #f5cc88; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-green { background: var(--green); color: #0a2010; }
+  .btn-green:hover { background: #85d4a0; }
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); padding: 5px 10px; font-size: 0.75rem; }
+  .btn-danger:hover { background: var(--red); color: #fff; }
+  .btn-edit { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); padding: 5px 10px; font-size: 0.75rem; }
+  .btn-edit:hover { background: var(--accent2); color: #001a24; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
+
+  /* TABS (Mobil Kaydırılabilir) */
+  .tabs { 
+    display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); 
+    flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px;
+  }
+  .tabs::-webkit-scrollbar { height: 3px; }
+  .tabs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  
+  .tab {
+    background: none; border: none; color: var(--muted);
+    font-size: 0.9rem; padding: 10px 16px; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    font-family: 'IBM Plex Sans', sans-serif; transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* FORM */
+  .section-title {
+    font-family: 'Libre Baskerville', serif; font-size: 1rem; color: var(--accent);
+    margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 0.78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+  input[type="text"], input[type="number"], select, textarea {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 12px; font-family: 'IBM Plex Sans', sans-serif; /* Mobilde rahat basım için padding büyütüldü */
+    font-size: 1rem; transition: border-color 0.18s, color 0.3s; width: 100%;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  
+  /* RADIO GROUPS (Pills) */
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-group input[type="radio"] { display: none; }
+  .radio-label {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 12px; cursor: pointer; font-size: 0.88rem; font-weight: 500;
+    color: var(--muted); transition: all 0.2s; text-align: center; user-select: none;
+  }
+  .radio-label:hover { border-color: rgba(232, 184, 109, 0.5); color: var(--text); }
+  .radio-group input[type="radio"]:checked + .radio-label {
+    background: rgba(232, 184, 109, 0.15); border-color: var(--accent); color: var(--accent);
+  }
+
+  /* CRITERIA */
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+
+  .criterion-card {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; transition: border-color 0.2s;
+    --level-color: var(--red);
+  }
+  .criterion-card:hover { border-color: var(--accent); }
+
+  .criterion-name { font-size: 0.85rem; color: var(--accent2); margin-bottom: 10px; font-weight: 500; }
+
+  .score-input-wrap { display: flex; align-items: center; gap: 8px; }
+  .score-input { width: 70px !important; text-align: center; font-weight: 600; font-size: 1.1rem !important; transition: color 0.3s ease; padding: 8px !important; }
+  .max-score { font-size: 0.78rem; color: var(--muted); }
+
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 6px; background: var(--border);
+    border-radius: 3px; border: none; padding: 0; margin-top: 10px; margin-bottom: 4px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--level-color); cursor: pointer; transition: background 0.3s ease;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--level-color);
+    border: none; cursor: pointer; transition: background 0.3s ease;
+  }
+
+  .progress-bar-wrap { margin-top: 8px; height: 4px; background: var(--border); border-radius: 2px; }
+  .progress-bar { height: 100%; border-radius: 2px; transition: width 0.3s ease, background-color 0.3s ease; }
+
+  /* TOTAL BOX */
+  .total-box {
+    background: var(--surface2); border: 1px solid var(--accent); border-radius: var(--radius);
+    padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px; margin-bottom: 20px;
+  }
+  .total-item { text-align: center; flex: 1; min-width: 80px;}
+  .total-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .total-value { font-family: 'Libre Baskerville', serif; font-size: 1.8rem; color: var(--accent); font-weight: 700; }
+  .total-value.percentage { color: var(--green); }
+  .total-value.letter { color: var(--accent2); }
+
+  /* BULK INPUT */
+  .bulk-area { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
+  .bulk-hint { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
+  .bulk-hint code { background: var(--bg); padding: 2px 6px; border-radius: 3px; color: var(--accent); word-break: break-all; }
+  textarea { resize: vertical; min-height: 100px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  th {
+    background: var(--surface2); color: var(--muted); font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.4px; font-size: 0.72rem; padding: 12px 12px; text-align: left;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  td { padding: 12px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge { display: inline-block; padding: 4px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+  .badge-green { background: rgba(109,191,138,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(232,184,109,0.15); color: var(--accent); }
+  .badge-red { background: rgba(224,112,112,0.15); color: var(--red); }
+
+  .type-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+  .type-konusma { background: rgba(126,184,212,0.12); color: var(--accent2); }
+  .type-yazma { background: rgba(232,184,109,0.12); color: var(--accent); }
+  
+  .konu-badge { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 4px 6px; border-radius: 4px; font-size: 0.7rem; color: var(--text); }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+  .stat-value { font-family: 'Libre Baskerville', serif; font-size: 1.6rem; color: var(--accent); }
+  .stat-label { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+
+  /* NOTIFICATION & MODALS */
+  .notif {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--green); color: #0a2010; padding: 12px 24px; border-radius: 8px;
+    font-weight: 600; font-size: 0.85rem; opacity: 0; transition: all 0.3s; z-index: 999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4); text-align: center; width: max-content; max-width: 90%;
+  }
+  .notif.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    z-index: 200; align-items: center; justify-content: center; padding: 10px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;
+  }
+  .modal h3 { font-family: 'Libre Baskerville', serif; color: var(--accent); margin-bottom: 15px; font-size: 1.05rem; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* CRITERIA SETTINGS */
+  .criteria-setting-item { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .criteria-setting-item input[type=text] { flex: 1; font-size: 0.9rem; padding: 8px;}
+  .criteria-setting-item input[type=number] { width: 60px !important; text-align:center; padding: 8px;}
+  .criteria-setting-item .remove-crit { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.4rem; padding: 4px; }
+  
+  .info-text { font-size: 0.75rem; color: var(--accent2); margin-top: 8px; display: block; line-height: 1.4;}
+
+  /* Mobil cihazlara özel kırılmalar */
+  @media(max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .header-actions { justify-content: flex-start; }
+    .criteria-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Ödev Değerlendirme <br><span>Türk Dili ve Edebiyatı</span></div>
+  <div class="header-actions">
+    <button class="btn-secondary" onclick="openCriteriaSettings()">⚙ Kriterler</button>
+    <button class="btn-secondary" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn-green" onclick="exportExcelHTML()">⬇ Excel</button>
+    <button class="btn-danger" style="color:var(--red)" onclick="clearAll()">🗑 Temizle</button>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tek')">Tek Öğrenci</button>
+    <button class="tab" onclick="switchTab('toplu')">Toplu Liste</button>
+    <button class="tab" onclick="switchTab('liste')">Kayıtlar <span id="countBadge"></span></button>
+    <button class="tab" onclick="switchTab('istatistik')">İstatistik</button>
+  </div>
+
+  <!-- TEK ÖĞRENCİ -->
+  <div id="tab-tek" class="tab-panel active">
+    <div class="section-title">👤 Öğrenci Bilgileri</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Öğrenci Adı Soyadı</label>
+        <input type="text" id="ogrenciAd" placeholder="Ad Soyad">
+      </div>
+      <div class="form-group">
+        <label>Sınıf / Şube</label>
+        <input type="text" id="sinif" placeholder="Örn: 10-A">
+      </div>
+      
+      <div class="form-group">
+        <label>Ödev Türü</label>
+        <div class="radio-group">
+          <input type="radio" id="turKonusma" name="odevTuru" value="Konuşma" checked onchange="onOdevTuruChange()">
+          <label class="radio-label" for="turKonusma">🎙 Konuşma</label>
+          
+          <input type="radio" id="turYazma" name="odevTuru" value="Yazma" onchange="onOdevTuruChange()">
+          <label class="radio-label" for="turYazma">✍ Yazma</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Ödev / Dönem</label>
+        <div class="radio-group">
+          <input type="radio" id="konu1_1" name="odevKonu" value="1.1" checked>
+          <label class="radio-label" for="konu1_1">1.1</label>
+          
+          <input type="radio" id="konu1_2" name="odevKonu" value="1.2">
+          <label class="radio-label" for="konu1_2">1.2</label>
+          
+          <input type="radio" id="konu2_1" name="odevKonu" value="2.1">
+          <label class="radio-label" for="konu2_1">2.1</label>
+          
+          <input type="radio" id="konu2_2" name="odevKonu" value="2.2">
+          <label class="radio-label" for="konu2_2">2.2</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">📋 Değerlendirme Kriterleri <span id="kriterBaslikTur" style="font-size:0.8rem;color:var(--muted);margin-left:auto">(Konuşma)</span></div>
+    <div class="criteria-grid" id="criteriaGrid"></div>
+
+    <div class="total-box">
+      <div class="total-item">
+        <div class="total-label">Ham Puan (/100)</div>
+        <div class="total-value" id="hamPuan">0</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">%15 Katkı</div>
+        <div class="total-value percentage" id="katki15">0.00</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Harf Notu</div>
+        <div class="total-value letter" id="harfNotu">—</div>
+      </div>
+      <div class="total-item">
+        <div class="total-label">Değerlendirme</div>
+        <div class="total-value" id="degerTur" style="font-size:0.95rem;color:var(--muted)">—</div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Notlar / Açıklama</label>
+      <textarea id="notlar" placeholder="İsteğe bağlı not..." style="min-height:60px"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-primary" style="flex:1; padding: 12px; font-size: 1rem;" onclick="kaydet()">✓ Kaydet</button>
+      <button class="btn-secondary" style="padding: 12px;" onclick="sifirla()">↺ Sıfırla</button>
+    </div>
+  </div>
+
+  <!-- TOPLU LİSTE -->
+  <div id="tab-toplu" class="tab-panel">
+    <div class="section-title">📥 Toplu Öğrenci Ekle</div>
+    <div class="bulk-area">
+      <div class="bulk-hint">
+        Her satıra bir öğrenci girin. Format:<br>
+        <code>Ad Soyad | Sınıf | Tür | Ödev | Kriter1 | Kriter2 | ...</code><br>
+        <br>Not: Yazdığınız türe ait güncel kriter sırası dikkate alınacaktır.
+      </div>
+      <textarea id="bulkInput" placeholder="Her satıra bir öğrenci...&#10;Ayşe Kaya | 10-A | Konuşma | 1.1 | 18 | 12 | 14 | 10 | 12 | 8 | 9&#10;Mehmet Demir | 10-B | Yazma | 2.1 | 15 | 18 | 13 | 12 | 8 | 9 | 10"></textarea>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="topluEkle()">✓ Toplu Ekle</button>
+        <button class="btn-secondary" onclick="ornekDoldur()">🔍 Örnek Doldur</button>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">📊 Şablon İndir</div>
+    <p style="color:var(--muted);font-size:0.83rem;margin-bottom:12px">İlgili ödev türünün CSV şablonunu indirip Excel'de doldurun, sonra yukarıdaki alana yapıştırın.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-secondary" onclick="downloadTemplate('Konuşma')">⬇ Şablon (Konuşma)</button>
+      <button class="btn-secondary" onclick="downloadTemplate('Yazma')">⬇ Şablon (Yazma)</button>
+    </div>
+  </div>
+
+  <!-- KAYITLAR -->
+  <div id="tab-liste" class="tab-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+      <div class="section-title" style="margin:0;border:none;padding:0">📋 Tüm Kayıtlar</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;width:100%">
+        <input type="text" id="aramaInput" placeholder="Öğrenci ara..." style="flex:1; min-width: 140px;" oninput="renderTable()">
+        <select id="filterTur" onchange="renderTable()" style="flex:1; min-width: 120px;">
+          <option value="">Tüm Türler</option>
+          <option value="Konuşma">Sadece Konuşma</option>
+          <option value="Yazma">Sadece Yazma</option>
+        </select>
+      </div>
+    </div>
+    <span class="info-text" id="tableInfoText">Tüm türler listelenirken detaylı kriter sütunları birleştirilerek gösterilir. Ayrıntılı başlıklar için tür filtreleyin. (Tabloyu sağa kaydırabilirsiniz)</span>
+    
+    <div class="table-wrap" style="margin-top:10px">
+      <table>
+        <thead>
+          <tr id="tableHead"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="icon">📭</div>
+      <p>Henüz kayıt yok. Öğrenci ekleyin.</p>
+    </div>
+  </div>
+
+  <!-- İSTATİSTİK -->
+  <div id="tab-istatistik" class="tab-panel">
+    <div class="section-title">📈 İstatistikler</div>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div id="noStats" style="color:var(--muted);font-size:0.9rem">Kayıt eklenince istatistikler görünecek.</div>
+  </div>
+</main>
+
+<!-- CRITERIA SETTINGS MODAL -->
+<div class="modal-overlay" id="criteriaModal">
+  <div class="modal">
+    <h3>⚙ Kriterleri Düzenle</h3>
+    <select id="settingsTur" onchange="renderCriteriaSettingsList(this.value)" style="margin-bottom:16px; font-weight: 500;">
+      <option value="Konuşma">🎙 Konuşma Kriterleri</option>
+      <option value="Yazma">✍ Yazma Kriterleri</option>
+    </select>
+    
+    <div id="criteriaSettingsList"></div>
+    <button class="btn-secondary" onclick="addCriterion()" style="margin-top:12px;width:100%; padding:10px;">+ Kriter Ekle</button>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeCriteriaModal()">İptal</button>
+      <button class="btn-primary" onclick="saveCriteria()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>✏ Kaydı Düzenle</h3>
+    <div id="editForm"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeEditModal()">İptal</button>
+      <button class="btn-primary" onclick="saveEdit()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ============ PWA INSTALLATION SUPPORT (DİNAMİK MANİFEST) ============
+// Bu kod tarayıcının uygulamayı "Ana Ekrana Ekleme" yeteneğini aktif eder.
+(function initPWA() {
+  const manifest = {
+    "name": "Ödev Değerlendirme Sistemi",
+    "short_name": "Ödev Sis.",
+    "start_url": window.location.href,
+    "display": "standalone",
+    "background_color": "#0f1117",
+    "theme_color": "#0f1117",
+    "icons": [
+      {
+        "src": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23e8b86d'/%3E%3Ctext x='256' y='360' font-size='300' font-family='serif' font-weight='bold' text-anchor='middle' fill='%231a1d27'%3EÖ%3C/text%3E%3C/svg%3E",
+        "sizes": "512x512",
+        "type": "image/svg+xml"
+      }
+    ]
+  };
+  
+  const blob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = url;
+  document.head.appendChild(link);
+})();
+
+
+// ============ STATE ============
+const defaultCriteria = {
+  'Konuşma': [
+    { name: 'İçerik / Konu', max: 20 },
+    { name: 'Dil ve Anlatım', max: 20 },
+    { name: 'Akıcılık / Düzgünlük', max: 15 },
+    { name: 'Beden Dili / Göz Teması', max: 15 },
+    { name: 'Ses Tonu / Vurgu', max: 10 },
+    { name: 'Süre Kullanımı', max: 10 },
+    { name: 'Özgünlük', max: 10 },
+  ],
+  'Yazma': [
+    { name: 'İçerik / Konu', max: 20 },
+    { name: 'Dil ve Anlatım / Üslup', max: 20 },
+    { name: 'Yazım ve Noktalama', max: 15 },
+    { name: 'Plan / Yapı', max: 15 },
+    { name: 'Kelime Dağarcığı', max: 10 },
+    { name: 'Biçimsel Düzen', max: 10 },
+    { name: 'Özgünlük', max: 10 },
+  ]
+};
+
+let criteria = JSON.parse(localStorage.getItem('odevCriteriaDynamic'));
+if (!criteria || Array.isArray(criteria)) {
+    criteria = defaultCriteria;
+    localStorage.setItem('odevCriteriaDynamic', JSON.stringify(criteria));
+}
+
+let records = JSON.parse(localStorage.getItem('odevRecords') || '[]');
+records.forEach(r => {
+  if (!r.konu || !['1.1','1.2','2.1','2.2'].includes(r.konu)) r.konu = '1.1'; 
+});
+
+let editIndex = null;
+let currentEditRecord = null;
+
+// ============ COLOR CALCULATION ============
+// Puan oranına göre renk döndürür: Düşük (Kırmızı), Orta (Sarı), İyi (Yeşil)
+function getColorForLevel(val, max) {
+  if (max === 0) return 'var(--muted)';
+  const ratio = val / max;
+  if (ratio < 0.40) return 'var(--red)';      // 0 - 39% -> Kırmızı
+  if (ratio < 0.75) return 'var(--accent)';   // 40 - 74% -> Sarı
+  return 'var(--green)';                      // 75 - 100% -> Yeşil
+}
+
+// Ortak görsel güncelleme fonksiyonu
+function updateVisuals(index, val, max, prefix) {
+  const color = getColorForLevel(val, max);
+  const card = document.getElementById(prefix + 'card' + index);
+  if (card) card.style.setProperty('--level-color', color);
+  
+  const pb = document.getElementById(prefix + 'pb' + index);
+  if (pb) {
+    pb.style.width = (val / max * 100) + '%';
+    pb.style.backgroundColor = color;
+  }
+  
+  const numInput = document.getElementById(prefix + 'c' + index);
+  if (numInput) numInput.style.color = color;
+}
+
+// ============ INIT ============
+function init() {
+  renderCriteriaGrid();
+  renderTable();
+  renderStats();
+  updateCountBadge();
+}
+
+// ============ TEK ÖĞRENCİ TAB ============
+function getSelectedTur() {
+  const selected = document.querySelector('input[name="odevTuru"]:checked');
+  return selected ? selected.value : 'Konuşma';
+}
+
+function getSelectedKonu() {
+  const selected = document.querySelector('input[name="odevKonu"]:checked');
+  return selected ? selected.value : '1.1';
+}
+
+function onOdevTuruChange() {
+  const tur = getSelectedTur();
+  document.getElementById('kriterBaslikTur').textContent = `(${tur})`;
+  renderCriteriaGrid();
+  calcTotal();
+}
+
+function renderCriteriaGrid() {
+  const tur = getSelectedTur();
+  const currentCriteria = criteria[tur];
+  const grid = document.getElementById('criteriaGrid');
+  
+  grid.innerHTML = currentCriteria.map((c, i) => {
+    const initColor = getColorForLevel(0, c.max);
+    return `
+    <div class="criterion-card" id="card${i}" style="--level-color: ${initColor}">
+      <div class="criterion-name">${c.name}</div>
+      <div class="score-input-wrap">
+        <input type="number" class="score-input" id="c${i}" min="0" max="${c.max}" value="0"
+          style="color: ${initColor}"
+          oninput="syncRange(${i}); calcTotal()">
+        <span class="max-score">/ ${c.max}</span>
+      </div>
+      <input type="range" id="r${i}" min="0" max="${c.max}" value="0"
+        oninput="syncInput(${i}); calcTotal()">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="pb${i}" style="width:0%; background-color: ${initColor}"></div>
+      </div>
+    </div>
+  `}).join('');
+}
+
+function syncRange(i) {
+  const tur = getSelectedTur();
+  const max = criteria[tur][i].max;
+  const val = Math.min(max, Math.max(0, +document.getElementById('c'+i).value || 0));
+  
+  document.getElementById('r'+i).value = val;
+  document.getElementById('c'+i).value = val;
+  updateVisuals(i, val, max, '');
+}
+
+function syncInput(i) {
+  const tur = getSelectedTur();
+  const max = criteria[tur][i].max;
+  const val = +document.getElementById('r'+i).value;
+  
+  document.getElementById('c'+i).value = val;
+  updateVisuals(i, val, max, '');
+}
+
+function getScores(tur) {
+  return criteria[tur].map((c, i) => Math.min(c.max, Math.max(0, +document.getElementById('c'+i).value || 0)));
+}
+
+function calcTotal() {
+  const tur = getSelectedTur();
+  const curCrit = criteria[tur];
+  const scores = getScores(tur);
+  
+  const total = scores.reduce((a, b) => a + b, 0);
+  const maxTotal = curCrit.reduce((a, c) => a + c.max, 0);
+  const normalized = maxTotal > 0 ? Math.round(total / maxTotal * 100) : 0;
+  const p15 = (normalized * 0.15).toFixed(2);
+  
+  document.getElementById('hamPuan').textContent = normalized;
+  document.getElementById('katki15').textContent = p15;
+  document.getElementById('harfNotu').textContent = getHarf(normalized);
+  document.getElementById('degerTur').textContent = getDeger(normalized);
+}
+
+function getHarf(p) {
+  if (p >= 85) return 'AA'; if (p >= 75) return 'BA'; if (p >= 65) return 'BB';
+  if (p >= 55) return 'CB'; if (p >= 45) return 'CC'; if (p >= 35) return 'DC'; return 'FF';
+}
+
+function getDeger(p) {
+  if (p >= 85) return 'Çok İyi'; if (p >= 70) return 'İyi'; if (p >= 55) return 'Orta';
+  if (p >= 45) return 'Geçer'; return 'Başarısız';
+}
+
+function getBadgeClass(p) {
+  if (p >= 70) return 'badge-green'; if (p >= 50) return 'badge-yellow'; return 'badge-red';
+}
+
+// ============ SAVE / RESET ============
+function kaydet() {
+  const ad = document.getElementById('ogrenciAd').value.trim();
+  if (!ad) { showNotif('Öğrenci adı giriniz!', true); return; }
+  
+  const tur = getSelectedTur();
+  const konu = getSelectedKonu();
+  const curCrit = criteria[tur];
+  const scores = getScores(tur);
+  
+  const total = scores.reduce((a, b) => a + b, 0);
+  const maxTotal = curCrit.reduce((a, c) => a + c.max, 0);
+  const normalized = maxTotal > 0 ? Math.round(total / maxTotal * 100) : 0;
+  
+  records.push({
+    ad,
+    sinif: document.getElementById('sinif').value.trim(),
+    tur: tur,
+    konu: konu,
+    scores,
+    puan: normalized,
+    katki15: (normalized * 0.15).toFixed(2),
+    harf: getHarf(normalized),
+    notlar: document.getElementById('notlar').value.trim(),
+    tarih: new Date().toLocaleDateString('tr-TR'),
+  });
+  
+  saveRecords();
+  showNotif('✓ Kayıt eklendi!');
+  sifirla();
+  updateCountBadge();
+  renderStats();
+}
+
+function sifirla() {
+  document.getElementById('ogrenciAd').value = '';
+  document.getElementById('sinif').value = '';
+  document.getElementById('notlar').value = '';
+  
+  document.getElementById('turKonusma').checked = true;
+  document.getElementById('konu1_1').checked = true;
+  
+  onOdevTuruChange(); // Formu ve renkleri yenile
+}
+
+function saveRecords() {
+  localStorage.setItem('odevRecords', JSON.stringify(records));
+  renderTable();
+}
+
+function clearAll() {
+  if (!confirm('Tüm kayıtlar silinecek. Emin misiniz?')) return;
+  records = [];
+  saveRecords();
+  updateCountBadge();
+  renderStats();
+}
+
+// ============ TOPLU ============
+function topluEkle() {
+  const lines = document.getElementById('bulkInput').value.trim().split('\n');
+  let added = 0;
+  lines.forEach(line => {
+    const parts = line.split('|').map(s => s.trim());
+    if (parts.length < 5) return;
+    
+    const [ad, sinif, rawTur, rawKonu, ...rawScores] = parts;
+    if (!ad) return;
+    
+    const tur = rawTur.includes('Yazma') ? 'Yazma' : 'Konuşma';
+    const konu = ['1.1','1.2','2.1','2.2'].includes(rawKonu) ? rawKonu : '1.1';
+    
+    const curCrit = criteria[tur];
+    const scores = curCrit.map((c, i) => Math.min(c.max, Math.max(0, +rawScores[i] || 0)));
+    const total = scores.reduce((a, b) => a + b, 0);
+    const maxTotal = curCrit.reduce((a, c) => a + c.max, 0);
+    const normalized = maxTotal > 0 ? Math.round(total / maxTotal * 100) : 0;
+    
+    records.push({
+      ad, sinif, tur, konu, scores,
+      puan: normalized,
+      katki15: (normalized * 0.15).toFixed(2),
+      harf: getHarf(normalized),
+      notlar: '',
+      tarih: new Date().toLocaleDateString('tr-TR'),
+    });
+    added++;
+  });
+  saveRecords();
+  updateCountBadge();
+  renderStats();
+  document.getElementById('bulkInput').value = '';
+  showNotif(`✓ ${added} öğrenci eklendi!`);
+}
+
+function ornekDoldur() {
+  const lines = [];
+  const cK = criteria['Konuşma'];
+  lines.push(`Ayşe Yılmaz | 10-A | Konuşma | 1.1 | ${cK.map(c => Math.round(Math.random()*c.max)).join(' | ')}`);
+  lines.push(`Ali Veli | 10-A | Konuşma | 1.2 | ${cK.map(c => Math.round(Math.random()*c.max)).join(' | ')}`);
+  const cY = criteria['Yazma'];
+  lines.push(`Zeynep Demir | 10-B | Yazma | 2.1 | ${cY.map(c => Math.round(Math.random()*c.max)).join(' | ')}`);
+  lines.push(`Can Şahin | 10-B | Yazma | 2.2 | ${cY.map(c => Math.round(Math.random()*c.max)).join(' | ')}`);
+  document.getElementById('bulkInput').value = lines.join('\n');
+}
+
+function downloadTemplate(tur) {
+  const cur = criteria[tur];
+  const header = ['Ad Soyad', 'Sınıf', 'Tür (Konuşma/Yazma)', 'Ödev (1.1/1.2/2.1/2.2)', ...cur.map(c => c.name + ' (/' + c.max + ')')];
+  const csv = '\uFEFF' + header.join(';') + '\n';
+  downloadFile(csv, `sablon_${tur.toLowerCase()}.csv`, 'text/csv;charset=utf-8');
+}
+
+// ============ TABLE ============
+function renderTable() {
+  const q = document.getElementById('aramaInput').value.toLowerCase();
+  const turFilter = document.getElementById('filterTur').value;
+  
+  let filtered = records.filter(r =>
+    (!q || r.ad.toLowerCase().includes(q) || (r.sinif||'').toLowerCase().includes(q)) &&
+    (!turFilter || r.tur === turFilter)
+  );
+
+  const head = document.getElementById('tableHead');
+  const infoText = document.getElementById('tableInfoText');
+  
+  let headHtml = `<th>#</th><th>Ad Soyad</th><th>Sınıf</th><th>Tür</th><th>Ödev</th>`;
+  
+  if (turFilter) {
+      infoText.style.display = 'none';
+      const curCrit = criteria[turFilter];
+      headHtml += curCrit.map(c => `<th title="${c.name}">${c.name.split(' ')[0]}<br><small>/${c.max}</small></th>`).join('');
+  } else {
+      infoText.style.display = 'block';
+      headHtml += `<th>Kriter Puanları <small>(Sırasıyla)</small></th>`;
+  }
+  headHtml += `<th>Puan</th><th>%15</th><th>Harf</th><th>Tarih</th><th>İşlem</th>`;
+  head.innerHTML = headHtml;
+
+  const body = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+
+  if (filtered.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  body.innerHTML = filtered.map((r, idx) => {
+    const realIdx = records.indexOf(r);
+    const turClass = r.tur === 'Konuşma' ? 'type-konusma' : 'type-yazma';
+    
+    let scoresHtml = '';
+    if (turFilter) {
+         const curCrit = criteria[turFilter];
+         scoresHtml = (r.scores||curCrit.map(()=>0)).map(s => `<td style="text-align:center">${s}</td>`).join('');
+    } else {
+         scoresHtml = `<td style="color:var(--muted); font-size:0.75rem; letter-spacing:1px">${(r.scores||[]).join(' | ')}</td>`;
+    }
+
+    return `
+      <tr>
+        <td style="color:var(--muted)">${idx+1}</td>
+        <td style="font-weight:500">${r.ad}</td>
+        <td>${r.sinif||'—'}</td>
+        <td><span class="type-badge ${turClass}">${r.tur}</span></td>
+        <td><span class="konu-badge">${r.konu||'1.1'}</span></td>
+        ${scoresHtml}
+        <td><span class="badge ${getBadgeClass(r.puan)}">${r.puan}</span></td>
+        <td style="color:var(--green);font-weight:600">${r.katki15}</td>
+        <td style="color:var(--accent2);font-weight:600">${r.harf}</td>
+        <td style="color:var(--muted);font-size:0.75rem">${r.tarih||''}</td>
+        <td style="display:flex;gap:6px;align-items:center">
+          <button class="btn-edit" onclick="openEdit(${realIdx})">✏</button>
+          <button class="btn-danger" onclick="sil(${realIdx})">✕</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function sil(i) {
+  if (!confirm('Bu kayıt silinecek?')) return;
+  records.splice(i, 1);
+  saveRecords();
+  updateCountBadge();
+  renderStats();
+}
+
+// ============ EDIT ============
+function openEdit(i) {
+  editIndex = i;
+  currentEditRecord = records[i];
+  const r = currentEditRecord;
+  
+  const isK = r.tur === 'Konuşma' ? 'checked' : '';
+  const isY = r.tur === 'Yazma' ? 'checked' : '';
+  const k11 = r.konu === '1.1' ? 'checked' : '';
+  const k12 = r.konu === '1.2' ? 'checked' : '';
+  const k21 = r.konu === '2.1' ? 'checked' : '';
+  const k22 = r.konu === '2.2' ? 'checked' : '';
+  
+  const form = document.getElementById('editForm');
+  form.innerHTML = `
+    <div class="form-grid">
+      <div class="form-group"><label>Ad Soyad</label><input type="text" id="eAd" value="${r.ad}"></div>
+      <div class="form-group"><label>Sınıf</label><input type="text" id="eSinif" value="${r.sinif||''}"></div>
+      
+      <div class="form-group">
+        <label>Tür</label>
+        <div class="radio-group">
+          <input type="radio" id="eTurKonusma" name="eTur" value="Konuşma" ${isK} onchange="renderEditCriteriaInputs()">
+          <label class="radio-label" for="eTurKonusma">🎙 Konuşma</label>
+          <input type="radio" id="eTurYazma" name="eTur" value="Yazma" ${isY} onchange="renderEditCriteriaInputs()">
+          <label class="radio-label" for="eTurYazma">✍ Yazma</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Ödev / Dönem</label>
+        <div class="radio-group">
+          <input type="radio" id="eKonu1_1" name="eKonu" value="1.1" ${k11}><label class="radio-label" for="eKonu1_1">1.1</label>
+          <input type="radio" id="eKonu1_2" name="eKonu" value="1.2" ${k12}><label class="radio-label" for="eKonu1_2">1.2</label>
+          <input type="radio" id="eKonu2_1" name="eKonu" value="2.1" ${k21}><label class="radio-label" for="eKonu2_1">2.1</label>
+          <input type="radio" id="eKonu2_2" name="eKonu" value="2.2" ${k22}><label class="radio-label" for="eKonu2_2">2.2</label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section-title" style="margin-top:12px">Kriterler</div>
+    <div id="editCriteriaWrap" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px"></div>
+    
+    <div style="margin-top:12px;padding:12px;background:var(--surface2);border-radius:8px;display:flex;gap:20px;flex-wrap:wrap">
+      <div><div style="font-size:0.72rem;color:var(--muted)">PUAN</div><div style="font-size:1.3rem;color:var(--accent);font-weight:700" id="eTotal">${r.puan}</div></div>
+      <div><div style="font-size:0.72rem;color:var(--muted)">%15</div><div style="font-size:1.3rem;color:var(--green);font-weight:700" id="eKatki">${r.katki15}</div></div>
+    </div>
+    <div class="form-group" style="margin-top:12px"><label>Notlar</label><textarea id="eNotlar" style="min-height:50px">${r.notlar||''}</textarea></div>
+  `;
+  
+  renderEditCriteriaInputs();
+  document.getElementById('editModal').classList.add('open');
+}
+
+function renderEditCriteriaInputs() {
+  const selectedTur = document.querySelector('input[name="eTur"]:checked').value;
+  const curCrit = criteria[selectedTur];
+  const wrap = document.getElementById('editCriteriaWrap');
+
+  const scoresToUse = (selectedTur === currentEditRecord.tur) ? (currentEditRecord.scores || []) : [];
+
+  wrap.innerHTML = curCrit.map((c,idx) => {
+    const val = scoresToUse[idx] || 0;
+    const color = getColorForLevel(val, c.max);
+    
+    return `
+    <div class="criterion-card" id="ecard${idx}" style="--level-color: ${color}">
+      <div class="criterion-name" style="font-size:0.75rem">${c.name}</div>
+      <div class="score-input-wrap">
+        <input type="number" class="score-input" id="ec${idx}" min="0" max="${c.max}" value="${val}"
+          style="color: ${color}" oninput="syncEditRange(${idx}); calcEditTotal()">
+        <span class="max-score">/ ${c.max}</span>
+      </div>
+      <input type="range" id="er${idx}" min="0" max="${c.max}" value="${val}"
+        oninput="syncEditInput(${idx}); calcEditTotal()">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="epb${idx}" style="width:${(val/c.max*100)}%; background-color:${color}"></div>
+      </div>
+    </div>
+  `}).join('');
+
+  calcEditTotal();
+}
+
+function syncEditRange(i) {
+  const tur = document.querySelector('input[name="eTur"]:checked').value;
+  const max = criteria[tur][i].max;
+  const val = Math.min(max, Math.max(0, +document.getElementById('ec'+i).value || 0));
+  
+  document.getElementById('er'+i).value = val;
+  document.getElementById('ec'+i).value = val;
+  updateVisuals(i, val, max, 'e');
+}
+
+function syncEditInput(i) {
+  const tur = document.querySelector('input[name="eTur"]:checked').value;
+  const max = criteria[tur][i].max;
+  const val = +document.getElementById('er'+i).value;
+  
+  document.getElementById('ec'+i).value = val;
+  updateVisuals(i, val, max, 'e');
+}
+
+function calcEditTotal() {
+  const selectedTur = document.querySelector('input[name="eTur"]:checked').value;
+  const curCrit = criteria[selectedTur];
+  
+  const scores = curCrit.map((c, i) => Math.min(c.max, Math.max(0, +document.getElementById('ec'+i).value||0)));
+  const total = scores.reduce((a,b)=>a+b,0);
+  const maxTotal = curCrit.reduce((a,c)=>a+c.max,0);
+  
+  const normalized = maxTotal > 0 ? Math.round(total/maxTotal*100) : 0;
+  document.getElementById('eTotal').textContent = normalized;
+  document.getElementById('eKatki').textContent = (normalized*0.15).toFixed(2);
+}
+
+function saveEdit() {
+  const selectedTur = document.querySelector('input[name="eTur"]:checked').value;
+  const selectedKonu = document.querySelector('input[name="eKonu"]:checked').value;
+  const curCrit = criteria[selectedTur];
+  
+  const scores = curCrit.map((c,i) => Math.min(c.max, Math.max(0,+document.getElementById('ec'+i).value||0)));
+  const total = scores.reduce((a,b)=>a+b,0);
+  const maxTotal = curCrit.reduce((a,c)=>a+c.max,0);
+  
+  const normalized = maxTotal > 0 ? Math.round(total/maxTotal*100) : 0;
+  
+  records[editIndex] = {
+    ...records[editIndex],
+    ad: document.getElementById('eAd').value.trim(),
+    sinif: document.getElementById('eSinif').value.trim(),
+    tur: selectedTur,
+    konu: selectedKonu,
+    scores, puan: normalized,
+    katki15: (normalized*0.15).toFixed(2),
+    harf: getHarf(normalized),
+    notlar: document.getElementById('eNotlar').value.trim(),
+  };
+  
+  saveRecords();
+  renderStats();
+  closeEditModal();
+  showNotif('✓ Kayıt güncellendi!');
+}
+
+function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
+
+// ============ CRITERIA SETTINGS ============
+function openCriteriaSettings() {
+  const tur = document.getElementById('settingsTur').value;
+  renderCriteriaSettingsList(tur);
+  document.getElementById('criteriaModal').classList.add('open');
+}
+
+function renderCriteriaSettingsList(tur) {
+  const list = document.getElementById('criteriaSettingsList');
+  list.innerHTML = criteria[tur].map((c, i) => `
+    <div class="criteria-setting-item" id="csi${i}">
+      <input type="text" value="${c.name}" id="cn${i}" placeholder="Kriter adı">
+      <input type="number" value="${c.max}" id="cm${i}" min="1" max="100" placeholder="Max">
+      <button class="remove-crit" onclick="removeCriterion(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function addCriterion() {
+  const tur = document.getElementById('settingsTur').value;
+  criteria[tur].push({ name: 'Yeni Kriter', max: 10 });
+  renderCriteriaSettingsList(tur);
+}
+
+function removeCriterion(i) {
+  const tur = document.getElementById('settingsTur').value;
+  if (criteria[tur].length <= 2) { alert('En az 2 kriter olmalı.'); return; }
+  criteria[tur].splice(i, 1);
+  renderCriteriaSettingsList(tur);
+}
+
+function saveCriteria() {
+  const tur = document.getElementById('settingsTur').value;
+  const newCrit = [];
+  let total = 0;
+  
+  const currentLength = criteria[tur].length;
+  for (let i = 0; i < currentLength; i++) {
+    const el = document.getElementById('cn'+i);
+    if(!el) continue;
+    const name = el.value.trim();
+    const max = Math.max(1, +document.getElementById('cm'+i).value || 10);
+    if (!name) continue;
+    newCrit.push({ name, max });
+    total += max;
+  }
+  
+  criteria[tur] = newCrit;
+  localStorage.setItem('odevCriteriaDynamic', JSON.stringify(criteria));
+  
+  closeCriteriaModal();
+  onOdevTuruChange();
+  renderTable();
+  showNotif(`✓ ${tur} için kriterler kaydedildi!`);
+}
+
+function closeCriteriaModal() { document.getElementById('criteriaModal').classList.remove('open'); }
+
+// ============ STATS ============
+function renderStats() {
+  const grid = document.getElementById('statsGrid');
+  const noStats = document.getElementById('noStats');
+  if (records.length === 0) { grid.innerHTML = ''; noStats.style.display = 'block'; return; }
+  noStats.style.display = 'none';
+  
+  const puanlar = records.map(r => r.puan);
+  const ort = (puanlar.reduce((a,b)=>a+b,0)/puanlar.length).toFixed(1);
+  const max = Math.max(...puanlar);
+  const min = Math.min(...puanlar);
+  const gecen = puanlar.filter(p => p >= 45).length;
+  const kalan = puanlar.length - gecen;
+  const konusma = records.filter(r=>r.tur==='Konuşma').length;
+  const yazma = records.filter(r=>r.tur==='Yazma').length;
+  const ortKatki = (records.reduce((a,r)=>a+(+r.katki15),0)/records.length).toFixed(2);
+
+  grid.innerHTML = [
+    ['Toplam Öğrenci', records.length, ''],
+    ['Sınıf Ortalaması', ort, ''],
+    ['En Yüksek', max, ''],
+    ['En Düşük', min, ''],
+    ['Geçen', gecen, ''],
+    ['Kalan / Düşük', kalan, ''],
+    ['Konuşma Ödevi', konusma, ''],
+    ['Yazma Ödevi', yazma, ''],
+    ['Ort. %15 Katkı', ortKatki, ''],
+  ].map(([label, val]) => `
+    <div class="stat-card">
+      <div class="stat-value">${val}</div>
+      <div class="stat-label">${label}</div>
+    </div>
+  `).join('');
+}
+
+// ============ EXPORT ============
+function exportCSV() {
+  if (records.length === 0) { showNotif('Kayıt yok!', true); return; }
+  const filterTur = document.getElementById('filterTur').value;
+  let headers, rows;
+
+  if (filterTur) {
+    const curCrit = criteria[filterTur];
+    headers = ['Ad Soyad','Sınıf','Tür','Ödev',...curCrit.map(c=>c.name),'Puan','%15 Katkı','Harf Notu','Tarih','Notlar'];
+    rows = records.filter(r=>r.tur === filterTur).map(r => [
+      r.ad, r.sinif||'', r.tur, r.konu||'1.1',
+      ...(r.scores||curCrit.map(()=>0)),
+      r.puan, r.katki15, r.harf, r.tarih||'', (r.notlar||'').replace(/;/g,'|')
+    ]);
+  } else {
+    headers = ['Ad Soyad','Sınıf','Tür','Ödev','Kriter Puanları','Puan','%15 Katkı','Harf Notu','Tarih','Notlar'];
+    rows = records.map(r => [
+      r.ad, r.sinif||'', r.tur, r.konu||'1.1',
+      (r.scores||[]).join(' | '),
+      r.puan, r.katki15, r.harf, r.tarih||'', (r.notlar||'').replace(/;/g,'|')
+    ]);
+  }
+  const csv = '\uFEFF' + [headers,...rows].map(r=>r.join(';')).join('\n');
+  downloadFile(csv, filterTur ? `degerlendirme_${filterTur.toLowerCase()}.csv` : 'degerlendirme_tumu.csv', 'text/csv;charset=utf-8');
+  showNotif('✓ CSV indirildi!');
+}
+
+function exportExcelHTML() {
+  if (records.length === 0) { showNotif('Kayıt yok!', true); return; }
+  const filterTur = document.getElementById('filterTur').value;
+  let headers, rows;
+
+  if (filterTur) {
+      const curCrit = criteria[filterTur];
+      headers = ['#','Ad Soyad','Sınıf','Tür','Ödev',...curCrit.map(c=>c.name),'Puan (/100)','%15 Katkı','Harf Notu','Tarih'];
+      rows = records.filter(r=>r.tur === filterTur).map((r,i) => [
+        i+1, r.ad, r.sinif||'', r.tur, r.konu||'1.1',
+        ...(r.scores||curCrit.map(()=>0)),
+        r.puan, r.katki15, r.harf, r.tarih||''
+      ]);
+  } else {
+      headers = ['#','Ad Soyad','Sınıf','Tür','Ödev','Kriter Puanları','Puan (/100)','%15 Katkı','Harf Notu','Tarih'];
+      rows = records.map((r,i) => [
+        i+1, r.ad, r.sinif||'', r.tur, r.konu||'1.1',
+        (r.scores||[]).join(' | '),
+        r.puan, r.katki15, r.harf, r.tarih||''
+      ]);
+  }
+  const table = `<table border="1">
+    <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+  </table>`;
+  const xls = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:x="urn:schemas-microsoft-com:office:excel"
+    xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="UTF-8"><style>
+      th{background:#d9a84e;color:#fff;font-weight:bold;padding:6px}
+      td{padding:4px 8px;vertical-align:middle;text-align:center;}
+    </style></head><body>${table}</body></html>`;
+  downloadFile('\uFEFF'+xls, filterTur ? `degerlendirme_${filterTur.toLowerCase()}.xls` : 'degerlendirme_tumu.xls', 'application/vnd.ms-excel;charset=utf-8');
+  showNotif('✓ Excel indirildi!');
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+// ============ UI HELPERS ============
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const idx = ['tek','toplu','liste','istatistik'].indexOf(id);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if (id === 'liste') renderTable();
+  if (id === 'istatistik') renderStats();
+}
+
+function updateCountBadge() {
+  const b = document.getElementById('countBadge');
+  b.textContent = records.length > 0 ? `(${records.length})` : '';
+}
+
+function showNotif(msg, error=false) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.style.background = error ? 'var(--red)' : 'var(--green)';
+  n.style.color = error ? '#fff' : '#0a2010';
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 2500);
+}
+
+// ============ START ============
+init();
+</script>
+</body>
+</html>
+
+
